@@ -1,22 +1,18 @@
 # 🍽️ AI Catering Assistant
 
-An **Agentic AI-powered Catering Assistant** built using **LangChain**, **Ollama (Llama 3)**, and **Python**. The assistant helps users discover suitable catering services by searching a curated dataset based on location, budget, specialization, rating, and other preferences.
-
-This project demonstrates how **AI Agents** can use tools to interact with structured data instead of relying only on the LLM's knowledge.
+An intelligent **Agentic AI-powered Catering Recommendation System** built using **LangChain**, **FastAPI**, and **Python**. The assistant helps users discover suitable caterers based on their event requirements through a collaborative multi-agent workflow.
 
 ---
 
 ## 🚀 Features
 
-- 🤖 AI-powered conversational assistant
-- 📍 Search caterers by location
-- 💰 Filter by budget tier
-- 🎉 Search by specialization (Wedding, Corporate, Birthday, etc.)
-- ⭐ Filter using minimum rating
-- 📞 Retrieve contact information
-- 🧮 Estimate catering cost
-- 📊 Excel-based dataset (100+ verified caterers)
-- 🔧 Built using LangChain Tools
+- 🤖 Multi-Agent AI Architecture
+- 🔍 Intelligent Caterer Search
+- ⭐ Personalized Recommendations
+- ⚖️ Caterer Comparison
+- 💰 Cost Estimation
+- 💬 Conversational Requirement Gathering
+- 🔧 Modular LangChain Tools
 
 ---
 
@@ -27,24 +23,39 @@ This project demonstrates how **AI Agents** can use tools to interact with struc
 - Ollama
 - Llama 3
 - Pandas
-- OpenPyXL
 
 ---
 
 # 📂 Project Structure
 
 ```
-CateringService/
+AI-Catering-Assistant/
+
+│
+├── agents/
+│   ├── interaction_agent.py
+│   ├── planner_agent.py
+│   ├── search_agent.py
+│   ├── recommendation_agent.py
+│   ├── comparison_agent.py
+│   └── cost_agent.py
+│
+├── tools/
+│   ├── search_tools.py
+│   ├── recommendation_tools.py
+│   ├── comparison_tools.py
+│   ├── estimation_tools.py
+│   ├── validation_tools.py
+│   └── utility_tools.py
+│
+├── services/
+│   ├── data_loader.py
 │
 ├── data/
-│   └── North_India_Caterers_Plus_100_No_Duplicates.xlsx
+│   └── data.zip
 │
-├── data_loader.py
-├── search.py
-├── tools.py
-├── model.py
-├── agent.py
-├── main.py
+│
+├── app.py
 ├── requirements.txt
 └── README.md
 ```
@@ -54,34 +65,29 @@ CateringService/
 # 📖 Project Workflow
 
 ```
-                User Query
-                     │
-                     ▼
-                LangChain Agent
-                     │
-                     ▼
-          Understand User Intent
-                     │
-                     ▼
-         Decide Which Tool to Call
-                     │
-                     ▼
-                 LangChain Tool
-                     │
-                     ▼
-                Search Functions
-                     │
-                     ▼
-              Excel Dataset Search
-                     │
-                     ▼
-            Matching Caterer Results
-                     │
-                     ▼
-           LLM Generates Response
-                     │
-                     ▼
-                    User
+                           User
+                            │
+                            ▼
+               User Interaction Agent
+          (Collects event requirements)
+                            │
+                            ▼
+                    Planning Agent
+          (Determines user intent & workflow)
+                            │
+          ┌─────────────────┼─────────────────┐
+          ▼                 ▼                 ▼
+    Search Agent    Comparison Agent   Cost Agent
+          │
+          ▼
+   Search Tools & Dataset
+          │
+          ▼
+  Recommendation Agent
+ (Ranks & explains results)
+          │
+          ▼
+         User
 ```
 
 ---
@@ -90,10 +96,10 @@ CateringService/
 
 ## 1. data_loader.py
 
-Responsible for loading the Excel dataset.
+Responsible for loading the zip dataset.
 
 Functions:
-- Reads Excel file
+- Reads zip file
 - Cleans column names
 - Handles missing values
 - Creates a Pandas DataFrame
@@ -117,21 +123,51 @@ This file **does not know anything about LangChain**.
 
 ## 3. tools.py
 
-Contains LangChain tools.
+The project follows an **Agent + Tool** architecture.
 
-Responsibilities:
+## Search Tools
 
-- Wrap Python functions using `@tool`
-- Expose functions to the AI Agent
-- Connect LangChain with business logic
+- search_caterers()
+- get_caterer_details()
 
-Example tools:
+---
 
-- search_caterers
-- get_contact_details
-- calculate_total_cost
-- list_all_regions
-- list_budget_categories
+## Recommendation Tools
+
+- rank_caterers()
+- calculate_match_score()
+- generate_recommendation_summary()
+
+---
+
+## Comparison Tools
+
+- compare_caterers()
+- highlight_differences()
+
+---
+
+## Cost Estimation Tools
+
+- estimate_cost()
+- estimate_budget_range()
+
+---
+
+## Validation Tools
+
+- extract_user_requirements()
+- validate_user_input()
+- identify_missing_fields()
+
+---
+
+## Utility Tools
+
+- load_dataset()
+- normalize_city_name()
+- normalize_budget()
+- validate_capacity()
 
 ---
 
@@ -151,19 +187,113 @@ model = init_chat_model(
 
 ---
 
-## 5. agent.py
+## 5.  Multi-Agent Workflow
 
-Creates the AI Agent.
+### 1. User Interaction Agent
+Responsible for interacting with users and collecting event requirements.
 
-The agent combines:
-
-- LLM
-- Tools
-- System Instructions
-
-The agent decides which tool should be called based on the user's request.
+Responsibilities:
+- Understand user requests
+- Ask follow-up questions
+- Maintain conversation context
+- Collect:
+  - Event Type
+  - City
+  - Number of Guests
+  - Budget
+  - Cuisine Preference
 
 ---
+
+### 2. Planning Agent
+
+Responsible for understanding user intent and deciding which specialist agent should execute the request.
+
+Possible workflows:
+
+```
+Find Caterer
+    ↓
+Search Agent
+    ↓
+Recommendation Agent
+```
+
+```
+Compare Caterers
+      ↓
+Comparison Agent
+```
+
+```
+Estimate Budget
+      ↓
+Cost Estimation Agent
+```
+
+---
+
+### 3. Search Agent
+
+Searches the catering dataset using user filters.
+
+Supported Filters:
+
+- City
+- Budget Tier
+- Guest Capacity
+- Rating
+- Specialization
+- Cuisine (Future)
+
+---
+
+### 4. Recommendation Agent
+
+Ranks matching caterers using multiple criteria:
+
+- Rating
+- Budget Match
+- Capacity Match
+- Specialization Match
+- Verification Status
+
+Returns the best recommendations with explanations.
+
+---
+
+### 5. Comparison Agent
+
+Compares multiple caterers based on:
+
+- Rating
+- Budget
+- Capacity
+- Contact Information
+- Website
+- Specialization
+
+---
+
+### 6. Cost Estimation Agent
+
+Calculates estimated catering cost based on:
+
+```
+Estimated Cost = Guests × Price Per Plate
+```
+
+Example:
+
+```
+500 Guests
+₹900 / Plate
+
+↓
+
+₹4,50,000
+---
+```
 
 ## 6. main.py
 
@@ -311,7 +441,7 @@ What regions do you cover?
 
 # 📊 Dataset
 
-The project uses an Excel dataset containing:
+The project uses an zip dataset containing:
 
 - Caterer Name
 - State / Area
@@ -328,19 +458,16 @@ The project uses an Excel dataset containing:
 
 # 🎯 Future Improvements
 
-- FastAPI Backend
-- React Frontend
-- MongoDB Database
-- Online Caterer APIs
+- Database Integration (PostgreSQL / MongoDB)
+- Real-Time Caterer Availability
 - Menu Recommendation
-- Availability Checking
-- Price Prediction
-- AI-Based Ranking System
-- User Authentication
-- Booking Management
-- Persistent Conversation Memory
-- Multi-city Support
-
+- Booking System
+- Google Maps Integration
+- Customer Reviews & Sentiment Analysis
+- Vector Database for Semantic Search
+- RAG-based Knowledge Retrieval
+- Multi-language Support
+- Admin Dashboard
 ---
 
 # 📚 Learning Outcomes
@@ -357,6 +484,16 @@ This project demonstrates:
 - AI Workflow Architecture
 
 ---
+
+
+# 👨‍💻 Contributors
+
+- Archita Garg
+- Gouransh
+- Dheeraj Sharma
+
+---
+
 
 # 📄 License
 
