@@ -1,19 +1,23 @@
 # 🍽️ AI Catering Assistant
 
-An intelligent **Agentic AI-powered Catering Recommendation System** built using **LangChain**, **FastAPI**, and **Python**. The assistant helps users discover suitable caterers based on their event requirements through a collaborative multi-agent workflow.
+An intelligent **Agentic AI-powered Catering Recommendation System** built using **LangChain** and **Python**. The assistant helps users discover suitable caterers based on their event requirements through a collaborative multi-agent workflow.
 
 ---
 
 ## 🚀 Features
 
 - 🤖 Multi-Agent AI Architecture
-- 🔍 Intelligent Caterer Search
+- 🧠 Intelligent Planning Agent
+- 🔍 AI-Powered Caterer Search
 - ⭐ Personalized Recommendations
 - ⚖️ Caterer Comparison
 - 💰 Cost Estimation
 - 💬 Conversational Requirement Gathering
+- 🗄️ Centralized Database Integration
 - 🔧 Modular LangChain Tools
-
+- 📊 Structured Data Retrieval
+- 🔄 Scalable Agent-Oriented Design
+  
 ---
 
 # 🛠 Tech Stack
@@ -48,6 +52,12 @@ AI-Catering-Assistant/
 │   ├── validation_tools.py
 │   └── utility_tools.py
 │
+├── database/
+│   ├── main.py
+│   ├── pyproject.toml
+│   ├── uv.lock
+│   ├── db_client.py
+│   
 ├── services/
 │   ├── data_loader.py
 │
@@ -64,30 +74,37 @@ AI-Catering-Assistant/
 
 # 📖 Project Workflow
 
-```
-                           User
-                            │
-                            ▼
-               User Interaction Agent
-          (Collects event requirements)
-                            │
-                            ▼
-                    Planning Agent
-          (Determines user intent & workflow)
-                            │
-          ┌─────────────────┼─────────────────┐
-          ▼                 ▼                 ▼
-    Search Agent    Comparison Agent   Cost Agent
-          │
-          ▼
-   Search Tools & Dataset
-          │
-          ▼
-  Recommendation Agent
- (Ranks & explains results)
-          │
-          ▼
-         User
+```text
+                            User
+                              │
+                              ▼
+                 Interaction Agent
+        (Collects Event Requirements)
+                              │
+                              ▼
+                    Planner Agent
+       (Determines User Intent & Workflow)
+                              │
+      ┌───────────────────────┼────────────────────────┐
+      ▼                       ▼                        ▼
+ Search Agent         Comparison Agent       Cost Estimation Agent
+      │                       │                        │
+      ▼                       ▼                        ▼
+ Search Tools         Comparison Tools      Estimation Tools
+      │                       │                        │
+      └───────────────┬───────┴───────────────┬────────┘
+                      ▼
+             Database Service Layer
+                      │
+                      ▼
+             Catering Database
+                      │
+                      ▼
+         Recommendation Agent
+     (Ranks & Explains Results)
+                      │
+                      ▼
+                    User
 ```
 
 ---
@@ -106,18 +123,33 @@ Functions:
 
 ---
 
-## 2. search.py
+## 2. Database Layer
 
-Contains the business logic.
+The project uses a dedicated database layer to store and retrieve catering information.
 
 Responsibilities:
 
-- Search caterers
-- Apply filters
-- Sort by rating
-- Return best matches
+- Store caterer information
+- Query caterers using filters
+- Retrieve caterer details
+- Support future database migration (PostgreSQL, MongoDB, etc.)
+- Provide a centralized data access layer for all AI tools
 
-This file **does not know anything about LangChain**.
+The AI agents never communicate directly with the database.
+
+Instead, every request follows this flow:
+
+```
+Agent
+   ↓
+Tool
+   ↓
+Database Layer
+   ↓
+Database
+```
+
+This separation keeps the project modular and scalable.
 
 ---
 
@@ -187,78 +219,112 @@ model = init_chat_model(
 
 ---
 
-## 5.  Multi-Agent Workflow
+## 5. Multi-Agent Workflow
 
-### 1. User Interaction Agent
-Responsible for interacting with users and collecting event requirements.
+### 1. Interaction Agent
+
+Responsible for communicating with users.
 
 Responsibilities:
+
 - Understand user requests
 - Ask follow-up questions
 - Maintain conversation context
 - Collect:
   - Event Type
   - City
-  - Number of Guests
+  - Guest Count
   - Budget
   - Cuisine Preference
 
 ---
 
-### 2. Planning Agent
+### 2. Planner Agent
 
-Responsible for understanding user intent and deciding which specialist agent should execute the request.
+Acts as the orchestrator of the system.
+
+Responsibilities:
+
+- Detect user intent
+- Decide which specialist agent should execute the request
+- Coordinate the complete workflow
 
 Possible workflows:
 
-```
 Find Caterer
-    ↓
+
+Interaction Agent
+
+↓
+
+Planner Agent
+
+↓
+
 Search Agent
-    ↓
+
+↓
+
 Recommendation Agent
-```
 
-```
 Compare Caterers
-      ↓
-Comparison Agent
-```
 
-```
-Estimate Budget
-      ↓
+Interaction Agent
+
+↓
+
+Planner Agent
+
+↓
+
+Comparison Agent
+
+Estimate Cost
+
+Interaction Agent
+
+↓
+
+Planner Agent
+
+↓
+
 Cost Estimation Agent
-```
 
 ---
 
 ### 3. Search Agent
 
-Searches the catering dataset using user filters.
-
-Supported Filters:
+Searches the catering database using filters such as:
 
 - City
-- Budget Tier
+- Budget
 - Guest Capacity
 - Rating
 - Specialization
-- Cuisine (Future)
+- Cuisine
+
+Uses:
+
+- Search Tools
+- Database Layer
 
 ---
 
 ### 4. Recommendation Agent
 
-Ranks matching caterers using multiple criteria:
+Ranks search results using:
 
 - Rating
 - Budget Match
 - Capacity Match
-- Specialization Match
+- Specialization
 - Verification Status
 
-Returns the best recommendations with explanations.
+Returns:
+
+- Top Recommendations
+- Explanation of rankings
 
 ---
 
@@ -277,22 +343,22 @@ Compares multiple caterers based on:
 
 ### 6. Cost Estimation Agent
 
-Calculates estimated catering cost based on:
+Calculates estimated catering costs.
 
-```
+Formula:
+
 Estimated Cost = Guests × Price Per Plate
-```
 
 Example:
 
-```
-500 Guests
-₹900 / Plate
+500 Guests × ₹900
 
 ↓
 
 ₹4,50,000
+
 ---
+
 ```
 
 ## 6. main.py
@@ -439,35 +505,63 @@ What regions do you cover?
 
 ---
 
-# 📊 Dataset
+# 🗄️ Database Integration
 
-The project uses an zip dataset containing:
+The project includes a dedicated database layer that serves as the single source of truth for all catering information.
 
-- Caterer Name
-- State / Area
-- Region / Zone
-- Contact Number
-- Email Address
-- Website
-- Budget Tier
-- Guest Capacity
-- Rating
-- Specialization
+Architecture:
+
+```text
+User
+   │
+   ▼
+Interaction Agent
+   │
+   ▼
+Planner Agent
+   │
+   ▼
+Specialized Agents
+   │
+   ▼
+LangChain Tools
+   │
+   ▼
+Database Service Layer
+   │
+   ▼
+Catering Database
+```
+
+The database layer is responsible for:
+
+- Fetching caterer information
+- Filtering results
+- Returning structured data
+- Supporting future migration to SQL or NoSQL databases
+
+Each AI agent interacts with the database only through LangChain tools, ensuring loose coupling and better maintainability.
 
 ---
 
 # 🎯 Future Improvements
 
-- Database Integration (PostgreSQL / MongoDB)
+- PostgreSQL Integration
+- MongoDB Support
 - Real-Time Caterer Availability
-- Menu Recommendation
-- Booking System
+- Booking Management
+- Menu Recommendation Engine
+- AI-based Dynamic Ranking
 - Google Maps Integration
-- Customer Reviews & Sentiment Analysis
-- Vector Database for Semantic Search
+- Customer Review Analysis
+- Vector Database Integration
 - RAG-based Knowledge Retrieval
 - Multi-language Support
-- Admin Dashboard
+- FastAPI Backend
+- React Dashboard
+- Admin Portal
+- Authentication & Authorization
+
 ---
 
 # 📚 Learning Outcomes
