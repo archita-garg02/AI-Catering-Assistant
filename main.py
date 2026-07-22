@@ -1,23 +1,28 @@
-from agent import agent
+from agents.interaction_agent import InteractionAgent
 
-while True:
 
-    query = input("User : ")
+def main():
+    print("=" * 60)
+    print("🍽️ Welcome to AI Catering Assistant")
+    print("Type 'exit' to quit.")
+    print("=" * 60)
 
-    if query.lower() == "exit":
-        break
+    interaction_agent = InteractionAgent()
 
-    response = agent.invoke(
-        {
-            "messages": [
-                {
-                    "role": "user",
-                    "content": query,
-                }
-            ]
-        }
-    )
+    while True:
+        user_input = input("\nYou: ").strip()
 
-    print("\nAI :")
+        if user_input.lower() in ["exit", "quit"]:
+            print("\n👋 Thank you for using AI Catering Assistant.")
+            break
 
-    print(response["messages"][-1].content)
+        try:
+            response = interaction_agent.handle_request(user_input)
+            print(f"\nAssistant: {response}")
+
+        except Exception as e:
+            print(f"\n❌ Error: {e}")
+
+
+if __name__ == "__main__":
+    main()
