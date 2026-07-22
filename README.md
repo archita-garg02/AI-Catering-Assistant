@@ -7,26 +7,32 @@ An intelligent **Agentic AI-powered Catering Recommendation System** built using
 ## 🚀 Features
 
 - 🤖 Multi-Agent AI Architecture
+- 💬 Conversational Interaction Agent
 - 🧠 Intelligent Planning Agent
-- 🔍 AI-Powered Caterer Search
-- ⭐ Personalized Recommendations
-- ⚖️ Caterer Comparison
-- 💰 Cost Estimation
-- 💬 Conversational Requirement Gathering
-- 🗄️ Centralized Database Integration
-- 🔧 Modular LangChain Tools
+- 🔍 MongoDB-Powered Caterer Search
+- ⭐ AI-Based Caterer Recommendations
+- 🗄️ Centralized MongoDB Database
+- 🛠️ LangChain Tool Calling
 - 📊 Structured Data Retrieval
-- 🔄 Scalable Agent-Oriented Design
+- 🔎 Dynamic Filtering (City, Budget, Rating, Capacity, Specialization)
+- ⚡ MongoDB Indexing for Faster Search
+- 🧹 Duplicate Data Removal Utilities
+- 🔄 Modular & Scalable Architecture
   
 ---
 
-# 🛠 Tech Stack
+## 🛠 Tech Stack
 
 - Python
 - LangChain
-- Ollama
-- Llama 3
+- MongoDB
+- MongoDB Compass
+- PyMongo
 - Pandas
+- BeautifulSoup4
+- FastAPI (Upcoming)
+- React (Upcoming)
+- Ollama (Configurable LLM)
 
 ---
 
@@ -41,33 +47,37 @@ AI-Catering-Assistant/
 │   ├── planner_agent.py
 │   ├── search_agent.py
 │   ├── recommendation_agent.py
-│   ├── comparison_agent.py
-│   └── cost_agent.py
+│   
 │
 ├── tools/
 │   ├── search_tools.py
 │   ├── recommendation_tools.py
 │   ├── comparison_tools.py
-│   ├── estimation_tools.py
-│   ├── validation_tools.py
-│   └── utility_tools.py
+│   
 │
 ├── database/
-│   ├── main.py
-│   ├── pyproject.toml
-│   ├── uv.lock
-│   ├── db_client.py
+│   ├── __init__.py
+│   ├── config.py
+│   ├── mongo_connection.py
+│   ├── import_html.py
+│   ├── query.py
+│   ├── create_indexes.py
+│   ├── remove_duplicates.py
+│   └── utils.py
 │   
-├── services/
-│   ├── data_loader.py
 │
 ├── data/
+│   ├── html/
 │   └── data.zip
 │
 │
+├── model.py
 ├── app.py
-├── requirements.txt
+├── main.py
+├── pyproject.toml
+├── uv.lock
 └── README.md
+
 ```
 
 ---
@@ -75,36 +85,35 @@ AI-Catering-Assistant/
 # 📖 Project Workflow
 
 ```text
-                            User
+                             User
                               │
                               ▼
-                 Interaction Agent
-        (Collects Event Requirements)
+                    Interaction Agent
                               │
                               ▼
-                    Planner Agent
-       (Determines User Intent & Workflow)
+                      Planner Agent
                               │
-      ┌───────────────────────┼────────────────────────┐
-      ▼                       ▼                        ▼
- Search Agent         Comparison Agent       Cost Estimation Agent
-      │                       │                        │
-      ▼                       ▼                        ▼
- Search Tools         Comparison Tools      Estimation Tools
-      │                       │                        │
-      └───────────────┬───────┴───────────────┬────────┘
-                      ▼
-             Database Service Layer
-                      │
-                      ▼
-             Catering Database
-                      │
-                      ▼
-         Recommendation Agent
-     (Ranks & Explains Results)
-                      │
-                      ▼
-                    User
+                              ▼
+                      Search Agent
+                              │
+                              ▼
+                     Search LangChain Tool
+                              │
+                              ▼
+                     Database Query Layer
+                              │
+                              ▼
+                           MongoDB
+                              │
+                              ▼
+                  Matching Caterer Documents
+                              │
+                              ▼
+                 Recommendation Agent
+                              │
+                              ▼
+                         Final Response
+
 ```
 
 ---
@@ -125,31 +134,92 @@ Functions:
 
 ## 2. Database Layer
 
-The project uses a dedicated database layer to store and retrieve catering information.
+The project uses MongoDB as the primary database.
 
-Responsibilities:
+The database layer is responsible for:
 
-- Store caterer information
-- Query caterers using filters
-- Retrieve caterer details
-- Support future database migration (PostgreSQL, MongoDB, etc.)
-- Provide a centralized data access layer for all AI tools
+- Importing HTML datasets
+- Cleaning and normalizing data
+- Storing caterer documents
+- Creating indexes
+- Removing duplicate records
+- Searching caterers using filters
+- Returning structured documents
 
-The AI agents never communicate directly with the database.
+Agents never communicate directly with MongoDB.
 
-Instead, every request follows this flow:
+Instead they follow:
 
-```
 Agent
-   ↓
-Tool
-   ↓
-Database Layer
-   ↓
-Database
-```
 
-This separation keeps the project modular and scalable.
+↓
+
+LangChain Tool
+
+↓
+
+Database Query Layer
+
+↓
+
+MongoDB
+
+### config.py
+
+Stores MongoDB configuration.
+
+---
+
+### mongo_connection.py
+
+Creates a reusable MongoDB connection.
+
+---
+
+### import_html.py
+
+Reads every HTML file.
+
+Extracts tables.
+
+Normalizes columns.
+
+Inserts data into MongoDB.
+
+---
+
+### query.py
+
+Provides reusable search functions:
+
+- search_by_city()
+- search_by_budget()
+- search_by_rating()
+- search_by_specialization()
+- search_by_guest_capacity()
+
+---
+
+### create_indexes.py
+
+Creates MongoDB indexes for faster searching.
+
+---
+
+### remove_duplicates.py
+
+Removes duplicate caterer records.
+
+---
+
+### utils.py
+
+Contains helper functions for:
+
+- cleaning text
+- rating conversion
+- guest capacity parsing
+- budget normalization
 
 ---
 
@@ -172,34 +242,6 @@ The project follows an **Agent + Tool** architecture.
 
 ---
 
-## Comparison Tools
-
-- compare_caterers()
-- highlight_differences()
-
----
-
-## Cost Estimation Tools
-
-- estimate_cost()
-- estimate_budget_range()
-
----
-
-## Validation Tools
-
-- extract_user_requirements()
-- validate_user_input()
-- identify_missing_fields()
-
----
-
-## Utility Tools
-
-- load_dataset()
-- normalize_city_name()
-- normalize_budget()
-- validate_capacity()
 
 ---
 
@@ -295,67 +337,31 @@ Cost Estimation Agent
 
 ### 3. Search Agent
 
-Searches the catering database using filters such as:
+Searches MongoDB using:
 
 - City
 - Budget
-- Guest Capacity
 - Rating
+- Guest Capacity
 - Specialization
-- Cuisine
+- Status
 
 Uses:
 
-- Search Tools
-- Database Layer
+- Search Tool
+- Query Layer
 
 ---
 
 ### 4. Recommendation Agent
 
-Ranks search results using:
+Uses MongoDB search results to:
 
-- Rating
-- Budget Match
-- Capacity Match
-- Specialization
-- Verification Status
+- Rank caterers
+- Explain recommendations
+- Summarize strengths
 
-Returns:
-
-- Top Recommendations
-- Explanation of rankings
-
----
-
-### 5. Comparison Agent
-
-Compares multiple caterers based on:
-
-- Rating
-- Budget
-- Capacity
-- Contact Information
-- Website
-- Specialization
-
----
-
-### 6. Cost Estimation Agent
-
-Calculates estimated catering costs.
-
-Formula:
-
-Estimated Cost = Guests × Price Per Plate
-
-Example:
-
-500 Guests × ₹900
-
-↓
-
-₹4,50,000
+Never queries MongoDB directly.
 
 ---
 
@@ -415,8 +421,15 @@ The tool executes the search.
 
 ### Step 5
 
-The search function filters the Excel dataset.
+The Search Tool queries MongoDB.
 
+↓
+
+MongoDB returns matching caterers.
+
+↓
+
+Recommendation Agent prepares the final response.
 ↓
 
 ### Step 6
@@ -502,8 +515,8 @@ Estimate catering cost for 300 guests at ₹800 per plate.
 
 What regions do you cover?
 ```
-
 ---
+
 
 # 🗄️ Database Integration
 
@@ -544,39 +557,38 @@ Each AI agent interacts with the database only through LangChain tools, ensuring
 
 ---
 
-# 🎯 Future Improvements
+## Future Improvements
 
-- PostgreSQL Integration
-- MongoDB Support
-- Real-Time Caterer Availability
-- Booking Management
-- Menu Recommendation Engine
-- AI-based Dynamic Ranking
-- Google Maps Integration
-- Customer Review Analysis
-- Vector Database Integration
-- RAG-based Knowledge Retrieval
-- Multi-language Support
+- Comparison Agent
+- Cost Estimation Agent
+- Booking Agent
+- Menu Recommendation Agent
+- Website Data Extraction
+- AI Menu Parsing
+- MongoDB Atlas Deployment
+- Vector Search
+- RAG Pipeline
 - FastAPI Backend
 - React Dashboard
-- Admin Portal
-- Authentication & Authorization
-
+- Authentication
+- Google Maps Integration
+- Customer Reviews
 ---
 
-# 📚 Learning Outcomes
-
-This project demonstrates:
+## 📚 Learning Outcomes
 
 - Agentic AI
+- LangChain Agents
 - LangChain Tools
 - Tool Calling
-- LLM Integration
-- Data Processing using Pandas
+- MongoDB
+- PyMongo
+- Database Design
+- HTML Data Parsing
 - Prompt Engineering
-- Modular Project Design
-- AI Workflow Architecture
-
+- AI Workflow Design
+- Modular Software Architecture
+- Retrieval-Augmented Generation (RAG) Fundamentals
 ---
 
 
