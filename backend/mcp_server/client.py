@@ -1,11 +1,17 @@
+import sys
+from pathlib import Path
+
 from langchain_mcp_adapters.client import MultiServerMCPClient
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 client = MultiServerMCPClient(
     {
         "catering": {
-            "command": "python",
+            "command": sys.executable,
             "args": ["-m", "mcp_server.server"],
             "transport": "stdio",
+            "cwd": BACKEND_DIR,
         }
     }
 )

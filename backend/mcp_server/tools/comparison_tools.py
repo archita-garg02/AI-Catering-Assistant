@@ -1,3 +1,4 @@
+from database.search_service import search_caterers_db
 from mcp_server.app import mcp
 
 @mcp.tool(name="compare_caterers")
@@ -8,7 +9,7 @@ def compare_caterers(
     Compare caterers.
     """
 
-    caterers = search_by_city(city)
+    caterers = search_caterers_db(city=city)
 
     comparison = []
 

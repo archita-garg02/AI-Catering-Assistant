@@ -1,3 +1,4 @@
+from database.search_service import search_caterers_db
 from mcp_server.app import mcp
 
 @mcp.tool(name="recommend_caterers")
@@ -9,7 +10,7 @@ def recommend_caterers(
     Recommend best caterers.
     """
 
-    caterers = search_caterers(city=city)
+    caterers = search_caterers_db(city=city)
 
     caterers = sorted(
         caterers,

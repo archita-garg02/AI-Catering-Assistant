@@ -1,13 +1,20 @@
-from agents.interaction_agent import InteractionAgent
+import asyncio
+import sys
+from pathlib import Path
+
+BACKEND_DIR = Path(__file__).resolve().parent / "backend"
+sys.path.insert(0, str(BACKEND_DIR))
+
+from supervisors.supervisor import get_app
 
 
-def main():
+async def run_session():
+    app = await get_app()
+
     print("=" * 60)
     print("🍽️ Welcome to AI Catering Assistant")
     print("Type 'exit' to quit.")
     print("=" * 60)
-
-    interaction_agent = InteractionAgent()
 
     while True:
         user_input = input("\nYou: ").strip()
@@ -17,11 +24,17 @@ def main():
             break
 
         try:
-            response = interaction_agent.handle_request(user_input)
-            print(f"\nAssistant: {response}")
+            result = await app.ainvoke(
+                {"messages": [{"role": "user", "content": user_input}]}
+            )
+            print(f"\nAssistant: {result['messages'][-1].content}")
 
         except Exception as e:
             print(f"\n❌ Error: {e}")
+
+
+def main():
+    asyncio.run(run_session())
 
 
 if __name__ == "__main__":

@@ -13,15 +13,24 @@ def search_caterers_db(
     query = {}
 
     if city:
-        query["city"] = city
+        query["state_area"] = {
+            "$regex": city,
+            "$options": "i",
+        }
 
     if budget:
-        query["budget"] = budget
+        query["budget_tier"] = {
+            "$regex": budget,
+            "$options": "i",
+        }
 
     if specialization:
-        query["specialization"] = specialization
+        query["specialization"] = {
+            "$regex": specialization,
+            "$options": "i",
+        }
 
     if min_rating is not None:
-        query["rating"] = {"$gte": min_rating}
+        query["rating"] = {"$gte": float(min_rating)}
 
     return list(collection.find(query, {"_id": 0}))

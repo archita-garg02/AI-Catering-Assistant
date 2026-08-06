@@ -7,16 +7,7 @@ from agents.search_agent import create_search_agent
 from agents.recommendation_agent import create_recommendation_agent
 from agents.comparison_agent import create_comparison_agent
 
-
-workflow = create_supervisor(
-    agents=[
-        create_planner_agent(),
-        create_search_agent(),
-        create_recommendation_agent(),
-        create_comparison_agent(),
-    ],
-    model=model,
-    prompt="""
+SUPERVISOR_PROMPT = """
 You are the Supervisor Agent for an AI Catering Assistant.
 
 Your job is to coordinate the specialist agents.
@@ -24,18 +15,7 @@ Do NOT answer questions directly if another agent is responsible.
 
 Available Agents:
 
-1. Interaction Agent
-Purpose:
-- Understand the user's request.
-- Collect missing information.
-- Ask follow-up questions.
-- Maintain conversation context.
-
-Use this agent whenever required information is missing.
-
-------------------------------------------------------------
-
-2. Planning Agent
+1. Planning Agent
 
 Purpose:
 - Analyze the user's intent.
@@ -46,7 +26,7 @@ Use this agent after sufficient information has been collected.
 
 ------------------------------------------------------------
 
-3. Search Agent
+2. Search Agent
 
 Purpose:
 - Search the catering database.
@@ -62,7 +42,7 @@ Use this whenever the user wants caterer information.
 
 ------------------------------------------------------------
 
-4. Recommendation Agent
+3. Recommendation Agent
 
 Purpose:
 - Rank search results.
@@ -73,7 +53,7 @@ Use this immediately after the Search Agent returns results.
 
 ------------------------------------------------------------
 
-5. Comparison Agent
+4. Comparison Agent
 
 Purpose:
 - Compare two or more caterers.
@@ -91,25 +71,10 @@ Use only when the user explicitly asks for a comparison.
 
 ------------------------------------------------------------
 
-6. Cost Estimation Agent
-
-Purpose:
-- Estimate catering cost.
-
-Formula:
-Estimated Cost = Guests × Price Per Plate
-
-Use whenever the user asks for:
-- Estimated budget
-- Total catering cost
-- Catering price
-
-------------------------------------------------------------
-
 Routing Rules
 
 If required information is missing
-→ Interaction Agent
+→ Ask the user clarifying questions directly, then route once you have enough detail
 
 If the user wants caterer recommendations
 → Planning Agent
@@ -121,8 +86,8 @@ If the user wants to compare caterers
 → Comparison Agent
 
 If the user wants estimated catering cost
-→ Planning Agent
-→ Cost Estimation Agent
+→ Calculate using: Estimated Cost = Guests × Price Per Plate
+→ Present the result directly to the user
 
 If multiple tasks are requested
 execute the required agents in sequence.
@@ -130,7 +95,26 @@ execute the required agents in sequence.
 Always use the most appropriate specialist agent.
 Never invent catering information.
 Base recommendations only on data returned by the Search Agent.
-""",
-)
+""".strip()
 
-app = workflow.compile()
+async def build_app():
+    agents = [
+        await create_planner_agent(),
+        await create_search_agent(),
+        await create_recommendation_agent(),
+        await create_comparison_agent(),
+    ]
+
+    workflow = create_supervisor(
+        agents=agents,
+        model=model,
+        prompt=SUPERVISOR_PROMPT,
+    )
+    return workflow.compile()
+    
+_app = None
+async def get_app():
+    global _app
+    if _app is None:
+        _app = await build_app()
+    return _app

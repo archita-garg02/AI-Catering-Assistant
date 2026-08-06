@@ -1,7 +1,7 @@
 from langchain.agents import create_agent
 
-from model import model
-from mcp.client import get_tools_by_name
+from models.model import model
+from mcp_server.client import get_tools_by_name
 
 
 async def create_planner_agent():
