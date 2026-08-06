@@ -7,16 +7,21 @@ An intelligent **Agentic AI-powered Catering Recommendation System** built using
 ## 🚀 Features
 
 - 🤖 Multi-Agent AI Architecture
-- 🧠 Intelligent Planning Agent
+- 🧠 LangGraph Supervisor for Intelligent Agent Orchestration
+- 📋 Planner Agent for Intent Analysis and Workflow Routing
 - 🔍 AI-Powered Caterer Search
-- ⭐ Personalized Recommendations
+- ⭐ Personalized Caterer Recommendations
 - ⚖️ Caterer Comparison
-- 💰 Cost Estimation
+- 💰 Catering Cost Estimation
 - 💬 Conversational Requirement Gathering
-- 🗄️ Centralized Database Integration
-- 🔧 Modular LangChain Tools
-- 📊 Structured Data Retrieval
-- 🔄 Scalable Agent-Oriented Design
+- 🔗 MCP (Model Context Protocol) Integration
+- 🚀 FastMCP Tool Server
+- 🗄️ MongoDB Database Integration
+- 🛠️ LangChain Tool Calling
+- 📊 Structured Data Retrieval and Filtering
+- 🔄 Modular & Scalable Agent-Oriented Design
+- ⚡ Asynchronous Agent Execution
+- 📦 Centralized Tool Management
   
 ---
 
@@ -24,9 +29,14 @@ An intelligent **Agentic AI-powered Catering Recommendation System** built using
 
 - Python
 - LangChain
+- LangGraph
+- LangGraph Supervisor
+- FastMCP (MCP Server)
+- LangChain MCP Adapters
+- MongoDB
 - Ollama
 - Llama 3
-- Pandas
+- uv
 
 ---
 
@@ -34,39 +44,55 @@ An intelligent **Agentic AI-powered Catering Recommendation System** built using
 
 ```
 AI-Catering-Assistant/
-
 │
-├── agents/
-│   ├── interaction_agent.py
-│   ├── planner_agent.py
-│   ├── search_agent.py
-│   ├── recommendation_agent.py
-│   ├── comparison_agent.py
-│   └── cost_agent.py
+├── backend/
+│   │
+│   ├── agents/
+│   │   ├── __init__.py
+│   │   ├── planner_agent.py
+│   │   ├── search_agent.py
+│   │   ├── recommendation_agent.py
+│   │   └── comparison_agent.py
+│   │
+│   ├── supervisors/
+│   │   └── supervisor.py
+│   │
+│   ├── models/
+│   │   └── model.py
+│   │
+│   ├── mcp_server/
+│   │   ├── app.py
+│   │   ├── client.py
+│   │   ├── server.py
+│   │   ├── test_mcp.py
+│   │   └── tools/
+│   │       ├── planner_tools.py
+│   │       ├── search_tools.py
+│   │       ├── recommendation_tools.py
+│   │       └── comparison_tools.py
+│   │
+│   ├── database/
+│   │   ├── config.py
+│   │   ├── mongo_connection.py
+│   │   ├── import_html.py
+│   │   ├── search_service.py
+│   │   ├── query.py
+│   │   ├── create_indexes.py
+│   │   ├── remove_duplicates.py
+│   │   └── utils.py
+│   │
+│   └── data/
+│       ├── data.zip
+│       └── html/
+│           ├── DELHI.html
+│           ├── HARYANA.html
+│           ├── MAHARASHTRA.html
+│           ├── ...
+│           └── (all HTML datasets)
 │
-├── tools/
-│   ├── search_tools.py
-│   ├── recommendation_tools.py
-│   ├── comparison_tools.py
-│   ├── estimation_tools.py
-│   ├── validation_tools.py
-│   └── utility_tools.py
-│
-├── database/
-│   ├── main.py
-│   ├── pyproject.toml
-│   ├── uv.lock
-│   ├── db_client.py
-│   
-├── services/
-│   ├── data_loader.py
-│
-├── data/
-│   └── data.zip
-│
-│
-├── app.py
-├── requirements.txt
+├── main.py
+├── pyproject.toml
+├── uv.lock
 └── README.md
 ```
 
@@ -75,287 +101,327 @@ AI-Catering-Assistant/
 # 📖 Project Workflow
 
 ```text
-                            User
-                              │
-                              ▼
-                 Interaction Agent
-        (Collects Event Requirements)
-                              │
-                              ▼
-                    Planner Agent
-       (Determines User Intent & Workflow)
-                              │
-      ┌───────────────────────┼────────────────────────┐
-      ▼                       ▼                        ▼
- Search Agent         Comparison Agent       Cost Estimation Agent
-      │                       │                        │
-      ▼                       ▼                        ▼
- Search Tools         Comparison Tools      Estimation Tools
-      │                       │                        │
-      └───────────────┬───────┴───────────────┬────────┘
-                      ▼
-             Database Service Layer
-                      │
-                      ▼
-             Catering Database
-                      │
-                      ▼
-         Recommendation Agent
-     (Ranks & Explains Results)
-                      │
-                      ▼
-                    User
+                  User
+                   │
+                   ▼
+                main.py
+                   │
+                   ▼
+          LangGraph Supervisor
+                   │
+      ┌────────────┼────────────┐
+      ▼            ▼            ▼
+   Planner      Search      Comparison
+    Agent         Agent          Agent
+      │            │            │
+      └──────┬─────┴────────────┘
+             ▼
+      Recommendation Agent
+             │
+             ▼
+         MCP Client
+             │
+             ▼
+        FastMCP Server
+             │
+             ▼
+      MongoDB Database
+             │
+             ▼
+          Response
 ```
 
 ---
 
 # 📁 Module Explanation
 
-## 1. data_loader.py
+## 1. data/
 
-Responsible for loading the zip dataset.
+The `data/` folder contains the raw catering dataset used to populate the database.
 
-Functions:
-- Reads zip file
-- Cleans column names
-- Handles missing values
-- Creates a Pandas DataFrame
+Contents:
 
----
-
-## 2. Database Layer
-
-The project uses a dedicated database layer to store and retrieve catering information.
+* `data.zip` – Original catering dataset
+* `html/` – Extracted HTML files containing caterer information from different cities and regions
 
 Responsibilities:
 
-- Store caterer information
-- Query caterers using filters
-- Retrieve caterer details
-- Support future database migration (PostgreSQL, MongoDB, etc.)
-- Provide a centralized data access layer for all AI tools
+* Store the raw dataset
+* Serve as the source for database import
+* Organize catering data region-wise
 
-The AI agents never communicate directly with the database.
+---
+
+## 2. database/
+
+The `database/` module is responsible for managing all interactions with MongoDB.
+
+### Responsibilities
+
+* Connect to MongoDB
+* Import caterer data from HTML files
+* Create database indexes
+* Execute search queries
+* Remove duplicate records
+* Provide reusable database services
+
+### Main Files
+
+* `mongo_connection.py` – Creates the MongoDB connection
+* `import_html.py` – Imports HTML data into MongoDB
+* `search_service.py` – Performs database searches
+* `query.py` – Executes search queries
+* `create_indexes.py` – Creates indexes for faster searching
+* `remove_duplicates.py` – Cleans duplicate records
+* `config.py` – Stores database configuration
+* `utils.py` – Helper functions
+
+The AI agents never access MongoDB directly.
 
 Instead, every request follows this flow:
 
-```
+```text
 Agent
-   ↓
-Tool
-   ↓
-Database Layer
-   ↓
-Database
+   │
+   ▼
+MCP Tool
+   │
+   ▼
+Database Service
+   │
+   ▼
+MongoDB
 ```
 
-This separation keeps the project modular and scalable.
+This layered architecture improves modularity, maintainability, and scalability.
 
 ---
 
-## 3. tools.py
+## 3. mcp_server/
 
-The project follows an **Agent + Tool** architecture.
+The project uses **FastMCP** to expose database operations as reusable tools.
 
-## Search Tools
+### Responsibilities
 
-- search_caterers()
-- get_caterer_details()
+* Register MCP tools
+* Handle tool execution requests
+* Connect AI agents with MongoDB
+* Return structured data to agents
+
+### Main Files
+
+* `server.py` – Starts the FastMCP server and registers tools
+* `client.py` – Connects AI agents to the MCP server
+* `app.py` – MCP application configuration
+* `test_mcp.py` – Tool testing
+
+### Available MCP Tools
+
+#### Planner Tool
+
+* `planner_tool`
+
+Determines the workflow based on the user's intent.
+
+#### Search Tool
+
+* `search_caterers`
+
+Searches caterers using filters such as:
+
+* City
+* Budget
+* Rating
+* Guest Capacity
+* Cuisine
+* Specialization
+
+#### Recommendation Tool
+
+* `recommend_caterers`
+
+Ranks search results and recommends the best caterers.
+
+#### Comparison Tool
+
+* `compare_caterers`
+
+Compares multiple caterers based on:
+
+* Rating
+* Budget
+* Capacity
+* Specialization
+* Contact Information
 
 ---
 
-## Recommendation Tools
+## 4. models/model.py
 
-- rank_caterers()
-- calculate_match_score()
-- generate_recommendation_summary()
-
----
-
-## Comparison Tools
-
-- compare_caterers()
-- highlight_differences()
-
----
-
-## Cost Estimation Tools
-
-- estimate_cost()
-- estimate_budget_range()
-
----
-
-## Validation Tools
-
-- extract_user_requirements()
-- validate_user_input()
-- identify_missing_fields()
-
----
-
-## Utility Tools
-
-- load_dataset()
-- normalize_city_name()
-- normalize_budget()
-- validate_capacity()
-
----
-
-## 4. model.py
-
-Initializes the LLM.
+Initializes the Large Language Model used by all AI agents.
 
 Example:
 
 ```python
 from langchain.chat_models import init_chat_model
 
-model = init_chat_model(
-    "ollama:llama3"
-)
+model = init_chat_model("ollama:llama3")
 ```
 
+Responsibilities:
+
+* Load the LLM
+* Provide a shared model instance
+* Handle reasoning and tool calling
+
 ---
 
-## 5. Multi-Agent Workflow
+# 🤖 Multi-Agent Workflow
 
-### 1. Interaction Agent
+The project follows a **Supervisor-Based Multi-Agent Architecture**.
 
-Responsible for communicating with users.
+---
+
+## 1. Supervisor Agent
+
+The Supervisor is the central controller of the application.
 
 Responsibilities:
 
-- Understand user requests
-- Ask follow-up questions
-- Maintain conversation context
-- Collect:
-  - Event Type
-  - City
-  - Guest Count
-  - Budget
-  - Cuisine Preference
+* Understand user requests
+* Decide which specialist agent should execute the task
+* Coordinate multiple agents
+* Route requests intelligently
+
+The Supervisor never accesses the database directly.
 
 ---
 
-### 2. Planner Agent
-
-Acts as the orchestrator of the system.
+## 2. Planner Agent
 
 Responsibilities:
 
-- Detect user intent
-- Decide which specialist agent should execute the request
-- Coordinate the complete workflow
-
-Possible workflows:
-
-Find Caterer
-
-Interaction Agent
-
-↓
-
-Planner Agent
-
-↓
-
-Search Agent
-
-↓
-
-Recommendation Agent
-
-Compare Caterers
-
-Interaction Agent
-
-↓
-
-Planner Agent
-
-↓
-
-Comparison Agent
-
-Estimate Cost
-
-Interaction Agent
-
-↓
-
-Planner Agent
-
-↓
-
-Cost Estimation Agent
-
----
-
-### 3. Search Agent
-
-Searches the catering database using filters such as:
-
-- City
-- Budget
-- Guest Capacity
-- Rating
-- Specialization
-- Cuisine
-
-Uses:
-
-- Search Tools
-- Database Layer
-
----
-
-### 4. Recommendation Agent
-
-Ranks search results using:
-
-- Rating
-- Budget Match
-- Capacity Match
-- Specialization
-- Verification Status
-
-Returns:
-
-- Top Recommendations
-- Explanation of rankings
-
----
-
-### 5. Comparison Agent
-
-Compares multiple caterers based on:
-
-- Rating
-- Budget
-- Capacity
-- Contact Information
-- Website
-- Specialization
-
----
-
-### 6. Cost Estimation Agent
-
-Calculates estimated catering costs.
-
-Formula:
-
-Estimated Cost = Guests × Price Per Plate
+* Analyze user intent
+* Extract search requirements
+* Decide the execution workflow
 
 Example:
 
-500 Guests × ₹900
+User:
 
-↓
+> Find wedding caterers in Delhi under ₹1000.
 
-₹4,50,000
+Planner extracts:
+
+* City = Delhi
+* Budget = Under ₹1000
+* Event = Wedding
+
+The Planner then routes the request to the Search Agent.
+
+---
+
+## 3. Search Agent
+
+Responsible for retrieving caterers from MongoDB.
+
+Search Filters:
+
+* City
+* Budget
+* Rating
+* Guest Capacity
+* Cuisine
+* Specialization
+
+Workflow:
+
+```text
+Search Agent
+      │
+      ▼
+search_caterers Tool
+      │
+      ▼
+MongoDB
+```
+
+The Search Agent only retrieves data; it does not rank or recommend caterers.
+
+---
+
+## 4. Recommendation Agent
+
+After the Search Agent returns results, the Recommendation Agent:
+
+* Ranks caterers
+* Selects the best matches
+* Explains why they are recommended
+
+Ranking Factors:
+
+* Rating
+* Budget Match
+* Capacity Match
+* Cuisine
+* Specialization
+
+Returns:
+
+* Best Caterers
+* Explanation of recommendations
+
+---
+
+## 5. Comparison Agent
+
+Used only when the user requests a comparison.
+
+Compares caterers using:
+
+* Rating
+* Budget
+* Capacity
+* Cuisine
+* Contact Information
+* Website
+* Specialization
+
+Returns a structured comparison table.
+
+---
+
+# 🔄 Complete Execution Flow
+
+```text
+User
+   │
+   ▼
+main.py
+   │
+   ▼
+Supervisor
+   │
+   ├──────────────┐
+   ▼              ▼
+Planner      Comparison
+   │
+   ▼
+Search Agent
+   │
+   ▼
+MCP Search Tool
+   │
+   ▼
+MongoDB
+   │
+   ▼
+Recommendation Agent
+   │
+   ▼
+Final Response
+```
+
 
 ---
 
@@ -547,7 +613,6 @@ Each AI agent interacts with the database only through LangChain tools, ensuring
 # 🎯 Future Improvements
 
 - PostgreSQL Integration
-- MongoDB Support
 - Real-Time Caterer Availability
 - Booking Management
 - Menu Recommendation Engine
@@ -557,7 +622,6 @@ Each AI agent interacts with the database only through LangChain tools, ensuring
 - Vector Database Integration
 - RAG-based Knowledge Retrieval
 - Multi-language Support
-- FastAPI Backend
 - React Dashboard
 - Admin Portal
 - Authentication & Authorization
@@ -568,15 +632,22 @@ Each AI agent interacts with the database only through LangChain tools, ensuring
 
 This project demonstrates:
 
-- Agentic AI
-- LangChain Tools
-- Tool Calling
-- LLM Integration
-- Data Processing using Pandas
-- Prompt Engineering
-- Modular Project Design
-- AI Workflow Architecture
-
+- 🤖 Agentic AI and Multi-Agent Systems
+- 🧠 LangChain Agent Development
+- 🔄 LangGraph Supervisor for Agent Orchestration
+- 🛠️ Model Context Protocol (MCP) Integration
+- ⚡ FastMCP Server Development
+- 🔧 LangChain Tool Calling
+- 🦙 LLM Integration with Ollama (Llama 3)
+- 🗄️ MongoDB Database Integration
+- 🔍 Structured Data Retrieval and Filtering
+- 📝 Prompt Engineering
+- ⚙️ Asynchronous Programming with Python (`asyncio`)
+- 🏗️ Modular and Scalable Project Architecture
+- 💬 Conversational AI Workflow Design
+- 🚀 AI Workflow Orchestration and Routing
+- 📦 Dependency Management using `uv`
+- 🌐 End-to-End AI Application Development
 ---
 
 
