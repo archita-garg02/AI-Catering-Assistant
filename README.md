@@ -195,6 +195,7 @@ MongoDB
 
 This layered architecture improves modularity, maintainability, and scalability.
 
+
 ---
 
 ## 3. mcp_server/
@@ -552,6 +553,139 @@ python main.py
 ```
 
 ---
+# 🗄️ Database Setup
+
+## 1. Start MongoDB
+
+Make sure MongoDB is running.
+
+### Linux
+
+```bash
+sudo systemctl start mongod
+```
+
+### Verify MongoDB
+
+```bash
+mongosh
+```
+
+---
+
+## 2. Create the Database
+
+Inside MongoDB Shell:
+
+```javascript
+use CateringDB
+```
+
+Check the current database:
+
+```javascript
+db
+```
+
+---
+
+## 3. Import Catering Dataset
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+```
+
+Run the data import script:
+
+```bash
+python database/import_html.py
+```
+
+This imports all HTML files from the `data/html/` directory into MongoDB.
+
+---
+
+## 4. Create Database Indexes
+
+```bash
+python database/create_indexes.py
+```
+
+Indexes improve search performance.
+
+---
+
+## 5. Remove Duplicate Records (Optional)
+
+```bash
+python database/remove_duplicates.py
+```
+
+---
+
+## 6. Verify Imported Data
+
+Open MongoDB Shell:
+
+```bash
+mongosh
+```
+
+Switch to the database:
+
+```javascript
+use CateringDB
+```
+
+Check available collections:
+
+```javascript
+show collections
+```
+
+Count total records:
+
+```javascript
+db.caterers.countDocuments()
+```
+
+View sample records:
+
+```javascript
+db.caterers.find().limit(5)
+```
+
+---
+
+## 7. Search Records
+
+Example query:
+
+```javascript
+db.caterers.find({
+    state_area: /Delhi/i
+})
+```
+
+Search by specialization:
+
+```javascript
+db.caterers.find({
+    specialization: /Wedding/i
+})
+```
+
+---
+
+## 8. Run the Application
+
+Start the AI Catering Assistant:
+
+```bash
+python main.py
+```
 
 # 💬 Example Queries
 
