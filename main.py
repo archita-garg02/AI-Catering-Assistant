@@ -1,6 +1,7 @@
 import asyncio
 import sys
 from pathlib import Path
+from pprint import pprint
 
 BACKEND_DIR = Path(__file__).resolve().parent / "backend"
 sys.path.insert(0, str(BACKEND_DIR))
@@ -22,15 +23,35 @@ async def run_session():
         if user_input.lower() in ["exit", "quit"]:
             print("\n👋 Thank you for using AI Catering Assistant.")
             break
-
+        
         try:
             result = await app.ainvoke(
                 {"messages": [{"role": "user", "content": user_input}]}
             )
-            print(f"\nAssistant: {result['messages'][-1].content}")
+
+            print("\nConversation:\n")
+
+            for msg in result["messages"]:
+                if hasattr(msg, "content") and msg.content:
+                    name = getattr(msg, "name", "assistant")
+                    print(f"{name}:")
+                    print(msg.content)
+                    print("-" * 50)
 
         except Exception as e:
             print(f"\n❌ Error: {e}")
+
+        # try:
+        #     result = await app.ainvoke(
+        #         {"messages": [{"role": "user", "content": user_input}]}
+        #     )
+        #     # print(f"\nAssistant: {result['messages'][-1].content}")
+        #     pprint(result)
+
+
+
+        # except Exception as e:
+        #     print(f"\n❌ Error: {e}")
 
 
 def main():

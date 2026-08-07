@@ -1,8 +1,8 @@
 from database.mongo_connection import get_database
 
 db = get_database()
-
 collection = db["caterers"]
+
 
 def search_caterers_db(
     city="",
@@ -33,4 +33,18 @@ def search_caterers_db(
     if min_rating is not None:
         query["rating"] = {"$gte": float(min_rating)}
 
-    return list(collection.find(query, {"_id": 0}))
+    print("\n========== DATABASE DEBUG ==========")
+    print("Database:", db.name)
+    print("Collection:", collection.name)
+    print("Query:", query)
+
+    results = list(collection.find(query, {"_id": 0}))
+
+    print("Results Found:", len(results))
+
+    if results:
+        print("First Result:", results[0]["caterer_name"])
+
+    print("====================================\n")
+
+    return results

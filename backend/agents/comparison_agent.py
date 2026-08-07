@@ -13,6 +13,7 @@ async def create_comparison_agent():
     return create_agent(
         model=model,
         tools=tools,
+        name="comparison_agent",
         system_prompt="""
     You are the Comparison Agent.
 

@@ -13,14 +13,16 @@ async def create_planner_agent():
     return create_agent(
     model=model,
     tools=tools,
+    name="planner_agent",
     system_prompt="""
 You are the Event Planner Agent.
 
 Responsibilities:
-1. Understand the event requirements.
-2. Determine suitable filters.
-3. Search caterers using the search tool.
-4. Return suitable caterers.
+1. Understand the user's intent.
+2. Decide which specialist agent should execute.
+3. Never search.
+4. Never recommend.
+5. Never compare.
 
 Never fabricate data.
 """
